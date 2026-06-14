@@ -9,7 +9,7 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-jammy
 EXPOSE 8080
 
-COPY ./target/java-maven-app-*.jar /usr/app
 WORKDIR /usr/app
+COPY ./target/java-maven-app-*.jar /usr/app
 
 CMD java -jar java-maven-app-*.jar
