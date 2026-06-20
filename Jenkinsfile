@@ -46,6 +46,7 @@ pipeline {
     agent any
     environment {
         NEW_VERSION = "1.2.0"
+        DOCKER_CREDS = credentials("docker-hub-credentials")
     }
     stages {
 
@@ -58,6 +59,8 @@ pipeline {
             }
             steps {
                 echo "building jar of version ${NEW_VERSION}"
+                echo "Logging in to Docker with credentials ${DOCKER_CREDS_USR}"
+                docker login("${DOCKER_CREDS_USR}", "${DOCKER_CREDS_PSW}")
             }
         }
         stage("test") {
