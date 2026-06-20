@@ -60,7 +60,7 @@ pipeline {
             steps {
                 echo "building jar of version ${NEW_VERSION}"
                 echo "Logging in to Docker with credentials ${DOCKER_CREDS_USR}"
-                docker login("${DOCKER_CREDS_USR}", "${DOCKER_CREDS_PSW}")
+                sh "docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}"
             }
         }
         stage("test") {
