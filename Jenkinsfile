@@ -44,7 +44,9 @@
 
 pipeline {
     agent any
-
+    environment {
+        NEW_VERSION = "1.2.0"
+    }
     stages {
 
         stage("build") {
@@ -52,20 +54,20 @@ pipeline {
                 expression { 
                     // env.BRANCH_NAME == "jenkins"
                     return env.GIT_BRANCH == "origin/jenkins" || env.GIT_BRANCH == "jenkins"  
-                    }
+                }
             }
             steps {
-                echo "building jar"
+                echo "building jar of version ${NEW_VERSION}"
             }
         }
         stage("test") {
             steps {
-                echo "building image"
+                echo "building image of version ${NEW_VERSION}"
             }
         }
         stage("deploy") {
             steps {
-                echo "deploying"
+                echo "deploying version ${NEW_VERSION}  to production"
             }
         }
     } 
