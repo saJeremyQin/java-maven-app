@@ -51,8 +51,8 @@ pipeline {
             when {
                 expression { 
                     // env.BRANCH_NAME == "jenkins"
-                    branch "jenkins"
-                 }
+                    return env.GIT_BRANCH == "origin/jenkins" || env.GIT_BRANCH == "jenkins"  
+                    }
             }
             steps {
                 echo "building jar"
