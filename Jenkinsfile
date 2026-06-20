@@ -48,6 +48,11 @@ pipeline {
     stages {
 
         stage("build") {
+            when {
+                expression { 
+                    BRANCH_NAME == "jenkins"
+                 }
+            }
             steps {
                 echo "building jar"
             }
@@ -62,5 +67,10 @@ pipeline {
                 echo "deploying"
             }
         }
-    }   
+    } 
+    post {
+        always {
+            echo "cleaning up"
+        }
+    }  
 }
