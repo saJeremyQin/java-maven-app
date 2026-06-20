@@ -50,7 +50,8 @@ pipeline {
         stage("build") {
             when {
                 expression { 
-                    env.BRANCH_NAME == "jenkins"
+                    // env.BRANCH_NAME == "jenkins"
+                    branch "jenkins"
                  }
             }
             steps {
