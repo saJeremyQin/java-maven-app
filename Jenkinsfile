@@ -44,8 +44,12 @@
 
 pipeline {
     agent any
+    parameters {
+        string(name: 'NEW_VERSION', defaultValue: '1.2.0', description: 'Version to build and deploy')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Whether to run tests')
+    }
     environment {
-        NEW_VERSION = "1.2.0"
+        NEW_VERSION = "${params.NEW_VERSION}"
         // DOCKER_CREDS = credentials("docker-hub-credentials")
     }
     stages {
@@ -71,8 +75,11 @@ pipeline {
             }
         }
         stage("test") {
+            when {
+                expression { return params.RUN_TESTS }
+            }
             steps {
-                echo "building image of version ${NEW_VERSION}"
+                echo "running tests for version ${NEW_VERSION}"
             }
         }
         stage("deploy") {
