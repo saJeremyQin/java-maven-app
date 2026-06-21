@@ -62,9 +62,10 @@ pipeline {
                 //echo "Logging in to Docker with credentials ${DOCKER_CREDS_USR}"
                 withCredentials([
                     usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: USER, passwordVariable: PWD)
-                ]) 
+                ]) {
+                   sh "docker login -u ${USER} -p ${PWD}"
+                }
                 
-                sh "docker login -u ${USER} -p ${PWD}"
             }
         }
         stage("test") {
