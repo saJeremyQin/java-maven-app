@@ -64,7 +64,9 @@ pipeline {
                     // sh '''
                     //     echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
                     // '''
-                    sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PWD}"
+                    //sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PWD}"
+                    sh "echo ${DOCKER_PWD} | docker login -u ${DOCKER_USER} --password-stdin"
+
                 }
             }
         }
