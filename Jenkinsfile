@@ -61,7 +61,7 @@ pipeline {
                 echo "building jar of version ${NEW_VERSION}"
                 //echo "Logging in to Docker with credentials ${DOCKER_CREDS_USR}"
                 withCredentials([
-                    usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_CREDS_USR', passwordVariable: 'DOCKER_CREDS_PSW')
+                    usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: DOCKER_CREDS_USR, passwordVariable: DOCKER_CREDS_PSW)
                 ]) 
                 
                 sh "docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}"
