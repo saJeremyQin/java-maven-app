@@ -5,6 +5,10 @@ pipeline {
     tools {
         maven "maven-3.9"
     }
+    parameters {
+        choice(name: 'VERSION', choices: ['1.2.0', '1.3.0', '1.4.0'], description: 'Version to build and deploy')
+        booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
+    }
     stages {
         stage("init") {
             steps {
