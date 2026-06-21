@@ -53,19 +53,18 @@ pipeline {
         stage("build") {
             when {
                 expression { 
-                    // env.BRANCH_NAME == "jenkins"
-                    return env.GIT_BRANCH == "origin/jenkins" || env.GIT_BRANCH == "jenkins"  
+                    return env.BRANCH_NAME == "jenkins" || env.GIT_BRANCH == "origin/jenkins" || env.GIT_BRANCH == "jenkins"
                 }
             }
             steps {
                 echo "building jar of version ${NEW_VERSION}"
-                //echo "Logging in to Docker with credentials ${DOCKER_CREDS_USR}"
                 withCredentials([
-                    usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: USER, passwordVariable: PWD)
+                    usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PWD')
                 ]) {
-                   sh "docker login -u ${USER} -p ${PWD}"
+                    sh '''
+                        echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
                 }
-                
             }
         }
         stage("test") {
