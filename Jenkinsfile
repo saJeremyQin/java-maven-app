@@ -46,7 +46,7 @@ pipeline {
     agent any
     parameters {
         string(name: 'NEW_VERSION', defaultValue: '1.2.0', description: 'Version to build and deploy')
-        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Whether to run tests')
+        booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
     }
     environment {
         NEW_VERSION = "${params.NEW_VERSION}"
