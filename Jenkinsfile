@@ -56,7 +56,6 @@ pipeline {
                 }
             }
         }
-        
         stage("commit back to git") {
             when {
                 expression {
@@ -72,3 +71,4 @@ pipeline {
         }
     }   
 }
+
