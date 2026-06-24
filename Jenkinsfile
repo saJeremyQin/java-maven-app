@@ -17,15 +17,26 @@ pipeline {
                 }
             }
         }
-        stage("build jar") {
+        stage("test") {
+            when {
+                expression {
+                    return params.RUN_TESTS
+                }
+            }
             steps {
                 script {
                     // echo "building jar"
                     gv.buildJar()
+                    echo "Executing pipeline for branch ${env.BRANCH_NAME} and version ${params.VERSION}"
                 }
             }
         }
-        stage("build image") {
+        stage("build") {
+            when {
+                expression {
+                    return env.BRANCH_NAME == "master"
+                }
+            }
             steps {
                 script {
                     // echo "building image"
@@ -43,4 +54,3 @@ pipeline {
         }
     }   
 }
-
