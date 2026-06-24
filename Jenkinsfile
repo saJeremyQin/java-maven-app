@@ -18,12 +18,12 @@ pipeline {
             }
         }
         stage("test") {
-            steps {
-                when {
-                    expression {
-                        return params.RUN_TESTS
-                    }
+            when {
+                expression {
+                    return params.RUN_TESTS
                 }
+            }
+            steps {
                 script {
                     // echo "building jar"
                     gv.buildJar()
