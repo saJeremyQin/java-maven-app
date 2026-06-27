@@ -36,11 +36,11 @@ pipeline {
             }
         }
         stage("build") {
-            when {
-                expression {
-                    return env.BRANCH_NAME == "master"
-                }
-            }
+            // when {
+            //     expression {
+            //         return env.BRANCH_NAME == "master"
+            //     }
+            // }
             steps {
                 script {
                     // echo "building image"
