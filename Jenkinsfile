@@ -9,7 +9,7 @@ pipeline {
         maven "maven-3.9"
     }
     parameters {
-        choice(name: 'VERSION', choices: ['1.2.0', '1.3.0', '1.4.0'], description: 'Version to build and deploy')
+        choice(name: 'VERSION', choices: ['1.2.0', '1.3.0', '2.1.0'], description: 'Version to build and deploy')
         booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
     }
     stages {
@@ -30,7 +30,7 @@ pipeline {
                 script {
                     // echo "building jar"
                     // gv.buildJar()
-                    buildJar()
+                    buildJar("$env.BRANCH_NAME")
                     echo "Executing pipeline for branch ${env.BRANCH_NAME} and version ${params.VERSION}"
                 }
             }
@@ -45,7 +45,7 @@ pipeline {
                 script {
                     // echo "building image"
                     // gv.buildImage()
-                    buildImage()
+                    buildImage("jeremyqindevops/demo-app:${params.VERSION}")
                 }
             }
         }
