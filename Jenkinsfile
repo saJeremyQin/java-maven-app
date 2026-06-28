@@ -9,7 +9,7 @@ pipeline {
         maven "maven-3.9"
     }
     parameters {
-        choice(name: 'VERSION', choices: ['1.2.0', '1.3.0', '2.1.0'], description: 'Version to build and deploy')
+        choice(name: 'VERSION', choices: ['1.3.0', '1.4.0', '2.1.0'], description: 'Version to build and deploy')
         booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
     }
     stages {
