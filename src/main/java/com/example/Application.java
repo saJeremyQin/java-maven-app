@@ -19,7 +19,7 @@ public class Application {
     {
         Logger log = LoggerFactory.getLogger(Application.class);
         log.info("Java app started");
-        // Additional initialization logic can be added here
+        // Additional initialization logic can be added here, should use javadoc
     }
 
     public String getStatus() {
