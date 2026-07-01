@@ -5,10 +5,7 @@ pipeline {
     tools {
         maven "maven-3.9"
     }
-    parameters {
-        choice(name: 'VERSION', choices: ['1.2.0', '1.3.0', '1.4.0'], description: 'Version to build and deploy')
-        booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
-    }
+
     stages {
         stage("init") {
             steps {
@@ -17,24 +14,28 @@ pipeline {
                 }
             }
         }
-        stage("test") {
-            when {
-                expression {
-                    return params.RUN_TESTS
+        stage("increment build number") {
+            steps {
+                script {
+                    echo "incrementing build number"
+                    gv.incrementBuildNumber()
                 }
             }
+        }
+        stage("build jar") {
+
             steps {
                 script {
                     // echo "building jar"
                     gv.buildJar()
-                    echo "Executing pipeline for branch ${env.BRANCH_NAME} and version ${params.VERSION}"
+                    echo "Executing pipeline for branch ${env.BRANCH_NAME}"
                 }
             }
         }
         stage("build") {
             when {
                 expression {
-                    return env.BRANCH_NAME == "master"
+                    return env.BRANCH_NAME == "jenkins" || env.BRANCH_NAME == "master"
                 }
             }
             steps {
