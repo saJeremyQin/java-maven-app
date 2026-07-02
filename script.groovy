@@ -19,6 +19,7 @@ def buildJar() {
 
 def buildImage() {
     def imageName = env.IMAGE_NAME ?: "latest"
+    def imageTag = "jeremyqindevops/demo-app:${imageName}"
     echo "building the docker image of version ${imageName}..."
     withCredentials([
         usernamePassword(
@@ -27,9 +28,9 @@ def buildImage() {
             usernameVariable: 'USER'
         )
     ]) {
-        sh "docker build -t jeremyqindevops/demo-app:$imageName ."
-        sh "echo $PASS | docker login -u $USER --password-stdin"
-        sh "docker push jeremyqindevops/demo-app:$imageName"
+        sh "docker build -t ${imageTag} ."
+        sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
+        sh "docker push ${imageTag}"
     }
 } 
 
