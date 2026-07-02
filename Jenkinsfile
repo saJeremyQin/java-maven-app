@@ -11,6 +11,8 @@ pipeline {
             steps {
                 script {
                     gv = load "script.groovy"
+                    env.ACTIVE_BRANCH = (env.BRANCH_NAME ?: env.GIT_BRANCH ?: env.CHANGE_BRANCH ?: "")
+                        .replaceFirst(/^origin\//, "")
                 }
             }
         }
@@ -28,14 +30,14 @@ pipeline {
                 script {
                     // echo "building jar"
                     gv.buildJar()
-                    echo "Executing pipeline for branch ${env.BRANCH_NAME}"
+                    echo "Executing pipeline for branch ${env.ACTIVE_BRANCH}"
                 }
             }
         }
         stage("build") {
             when {
                 expression {
-                    return env.BRANCH_NAME == "jenkins" || env.BRANCH_NAME == "master"
+                    return env.ACTIVE_BRANCH == "jenkins" || env.ACTIVE_BRANCH == "master"
                 }
             }
             steps {
