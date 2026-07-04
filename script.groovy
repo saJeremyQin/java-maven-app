@@ -39,17 +39,12 @@ def commitBackToGit() {
 
     sh "git config user.email 'jenkins-bot@local'"
     sh 'git config user.name "jenkins-bot"'
-    withCredentials([
-        usernamePassword(
-            credentialsId: 'jenkins-github',
-            usernameVariable: 'GIT_USERNAME',
-            passwordVariable: 'GIT_PASSWORD'
-        )
+    withCredentials([string(credentialsId: 'jenkins-github-token', variable: 'GITHUB_TOKEN')
     ]) {
         sh '''
             git add .
-            git commit -m "Increment build number [jenkins-auto] [skip ci]" || echo "No changes to commit"
-            git push https://saJeremyQin:$GIT_PASSWORD@github.com/saJeremyQin/java-maven-app.git HEAD:jenkins
+            git commit -m "Increment build number" || echo "No changes to commit"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:jenkins
         '''
     }
 }
