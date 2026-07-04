@@ -47,6 +47,16 @@ pipeline {
                 }
             }
         }
+
+        stage("deploy") {
+            steps {
+                script {
+                    // echo "deploying"
+                    gv.deployApp()
+                }
+            }
+        }
+        
         stage("commit back to git") {
             when {
                 expression {
@@ -57,14 +67,6 @@ pipeline {
                 script {
                     // echo "committing back to git"
                     gv.commitBackToGit()
-                }
-            }
-        }
-        stage("deploy") {
-            steps {
-                script {
-                    // echo "deploying"
-                    gv.deployApp()
                 }
             }
         }
