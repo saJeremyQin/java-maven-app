@@ -35,6 +35,25 @@ def buildImage() {
     }
 } 
 
+def commitBackToGit() {
+
+    sh "git config user.email 'jenkins-bot@local'"
+    sh 'git config user.name "jenkins-bot"'
+    withCredentials([
+        usernamePassword(
+            credentialsId: 'jenkins-github',
+            usernameVariable: 'GIT_USERNAME',
+            passwordVariable: 'GIT_PASSWORD'
+        )
+    ]) {
+        sh '''
+            git add .
+            git commit -m "Increment build number [jenkins-auto] [skip ci]" || echo "No changes to commit"
+            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/saJeremyQin/java-maven-app.git HEAD:jenkins
+        '''
+    }
+}
+
 def deployApp() {
     echo 'deploying the application...'
 } 

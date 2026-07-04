@@ -34,7 +34,7 @@ pipeline {
                 }
             }
         }
-        stage("build") {
+        stage("buildImage") {
             when {
                 expression {
                     return env.ACTIVE_BRANCH == "jenkins" || env.ACTIVE_BRANCH == "master"
@@ -44,6 +44,19 @@ pipeline {
                 script {
                     // echo "building image"
                     gv.buildImage()
+                }
+            }
+        }
+        stage("commit back to git") {
+            when {
+                expression {
+                    return env.ACTIVE_BRANCH == "jenkins" || env.ACTIVE_BRANCH == "master"
+                }
+            }
+            steps {
+                script {
+                    echo "committing back to git"
+                    gv.commitBackToGit()
                 }
             }
         }
