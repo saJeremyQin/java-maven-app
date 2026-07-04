@@ -55,7 +55,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "committing back to git"
+                    // echo "committing back to git"
                     gv.commitBackToGit()
                 }
             }
