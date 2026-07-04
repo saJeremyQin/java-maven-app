@@ -14,6 +14,7 @@ def incrementBuildNumber() {
 
 def buildJar() {
     echo "building the application..."
+    echo "test webhook setting for this project"
     sh 'mvn clean package'
 }
 
