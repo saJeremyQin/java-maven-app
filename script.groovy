@@ -49,7 +49,7 @@ def commitBackToGit() {
         sh '''
             git add .
             git commit -m "Increment build number [jenkins-auto] [skip ci]" || echo "No changes to commit"
-            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/saJeremyQin/java-maven-app.git HEAD:jenkins
+            git push https://saJeremyQin:$GIT_PASSWORD@github.com/saJeremyQin/java-maven-app.git HEAD:jenkins
         '''
     }
 }
