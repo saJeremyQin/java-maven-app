@@ -5,50 +5,46 @@ pipeline {
     tools {
         maven "maven-3.9"
     }
-    parameters {
-        choice(name: 'VERSION', choices: ['1.2.0', '1.3.0', '1.4.0'], description: 'Version to build and deploy')
-        booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
-    }
+
     stages {
-        stage("init") {
-            steps {
-                script {
-                    gv = load "script.groovy"
-                }
-            }
-        }
+        // stage("init") {
+        //     steps {
+        //         script {
+        //             gv = load "script.groovy"
+        //         }
+        //     }
+        // }
         stage("test") {
-            when {
-                expression {
-                    return params.RUN_TESTS
-                }
-            }
+
             steps {
                 script {
-                    // echo "building jar"
-                    gv.buildJar()
-                    echo "Executing pipeline for branch ${env.BRANCH_NAME} and version ${params.VERSION}"
-                }
+                    echo "Testing the application"
+                    }
             }
         }
         stage("build") {
-            when {
-                expression {
-                    return env.BRANCH_NAME == "master"
-                }
-            }
+         
             steps {
                 script {
-                    // echo "building image"
-                    gv.buildImage()
+                    echo "building the application"
                 }
             }
         }
         stage("deploy") {
             steps {
                 script {
-                    echo "---- deploying of version ${params.VERSION}..."
-                    gv.deployApp()
+                    echo "deploying the application"
+                    def dockerCmd = "docker run -d -p 3080:3080 jeremyqindevops/demo-app:1.0"
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'ec2-ssh-key', 
+                        keyFileVariable: 'KEY_FILE', 
+                        usernameVariable: 'SSH_USER')]) {
+
+                            sh """
+                                chmod 400 $KEY_FILE
+                                ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@3.26.224.83 ${dockerCmd}
+                            """       
+                    }
                 }
             }
         }
