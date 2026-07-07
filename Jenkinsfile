@@ -36,8 +36,8 @@ pipeline {
                     echo "deploying the application"
                     def dockerCmd = "docker run -d -p 3080:3080 jeremyqindevops/demo-app:1.0"
                     withCredentials([sshUserPrivateKey(
-                        credentialsId: 'ec2-ssh-key', 
-                        keyFileVariable: 'KEY_FILE', 
+                        credentialsId: 'ec2-ssh-key',
+                        keyFileVariable: 'KEY_FILE',
                         usernameVariable: 'SSH_USER')]) {
 
                             sh """
