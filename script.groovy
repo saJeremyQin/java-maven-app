@@ -40,7 +40,7 @@ def commitBackToGit() {
     echo "committing back to git, in the function..."
     sh "git config user.email 'jenkins-bot@local'"
     sh 'git config user.name "jenkins-bot"'
-    withCredentials([string(credentialsId: 'jenkins-github-token', variable: 'GITHUB_TOKEN')
+    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')
     ]) {
         sh '''
             git add .
