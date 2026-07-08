@@ -1,7 +1,7 @@
 
 
 def deployApp() {
-    echo "deploying the application of version ${params.VERSION}..."
+    echo "deploying the application of ..."
 } 
 
 return this
