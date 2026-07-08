@@ -8,30 +8,26 @@ pipeline {
     tools {
         maven "maven-3.9"
     }
-    parameters {
-        choice(name: 'VERSION', choices: ['1.3.0', '1.4.0', '2.1.0'], description: 'Version to build and deploy')
-        booleanParam(name: 'RUN_TESTS', defaultValue: false, description: 'Whether to run tests')
+    environment {
+        IMAGE_NAME = "jeremyqindevops/demo-app:java-maven-1.0"
     }
+
     stages {
-        stage("init") {
-            steps {
-                script {
-                    gv = load "script.groovy"
-                }
-            }
-        }
+        // stage("init") {
+        //     steps {
+        //         script {
+        //             gv = load "script.groovy"
+        //         }
+        //     }
+        // }
         stage("test") {
-            when {
-                expression {
-                    return params.RUN_TESTS
-                }
-            }
+
             steps {
                 script {
                     // echo "building jar"
                     // gv.buildJar()
                     buildJar("$env.BRANCH_NAME")
-                    echo "Executing pipeline for branch ${env.BRANCH_NAME} and version ${params.VERSION}"
+                    echo "Executing pipeline for branch ${env.BRANCH_NAME}"
                 }
             }
         }
@@ -45,7 +41,7 @@ pipeline {
                 script {
                     // echo "building image"
                     // gv.buildImage()
-                    buildImage("jeremyqindevops/demo-app:${params.VERSION}")
+                    buildImage(env.IMAGE_NAME)
                 }
             }
         }
@@ -53,7 +49,19 @@ pipeline {
             steps {
                 script {
                     // echo "deploying"
-                    gv.deployApp()
+                    // gv.deployApp()
+                    echo "deploying the application to EC2 instance..."
+                    def dockerCmd = "docker run -d -p 8080:8080 ${env.IMAGE_NAME}"
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'ec2-ssh-key',
+                        keyFileVariable: 'KEY_FILE',
+                        usernameVariable: 'SSH_USER')]) {
+
+                            sh """
+                                chmod 400 $KEY_FILE
+                                ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@3.107.252.89 ${dockerCmd}
+                            """       
+                    }
                 }
             }
         }
