@@ -4,7 +4,7 @@
 def gv
 
 pipeline {
-    agent any
+    agent { label 'arm64' }
     tools {
         maven "maven-3.9"
     }
@@ -23,11 +23,11 @@ pipeline {
         stage("agent-diagnostics") {
             steps {
             sh '''
-            echo "NODE_NAME=$NODE_NAME"
-            echo "EXECUTOR_NUMBER=$EXECUTOR_NUMBER"
-            uname -m
-            docker info --format '{{.Architecture}}'
-            env | grep -i DOCKER_DEFAULT_PLATFORM || true
+                echo "NODE_NAME=$NODE_NAME"
+                echo "EXECUTOR_NUMBER=$EXECUTOR_NUMBER"
+                uname -m
+                docker info --format '{{.Architecture}}'
+                env | grep -i DOCKER_DEFAULT_PLATFORM || true
             '''
             }
         }
