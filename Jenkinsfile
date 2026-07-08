@@ -1,15 +1,15 @@
 #!/usr/bin/env groovy
 @Library('jenkins-shared-library@master') 
 
-def gv
 
 pipeline {
-    agent { label 'arm64' }
+    agent any
     tools {
         maven "maven-3.9"
     }
     environment {
         IMAGE_NAME = "jeremyqindevops/demo-app:java-maven-1.0"
+        DOCKER_PLATFORMS = "linux/amd64,linux/arm64"
     }
 
     stages {
@@ -50,9 +50,16 @@ pipeline {
             // }
             steps {
                 script {
-                    // echo "building image"
-                    // gv.buildImage()
-                    buildImage(env.IMAGE_NAME)
+                    sh '''
+                        set -e
+                        docker buildx create --name multiarch-builder --use >/dev/null 2>&1 || true
+                        docker buildx inspect --bootstrap
+                        docker buildx build \
+                          --platform "$DOCKER_PLATFORMS" \
+                          -t "$IMAGE_NAME" \
+                          --push \
+                          .
+                    '''
                 }
             }
         }
