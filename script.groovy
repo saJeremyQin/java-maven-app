@@ -5,10 +5,25 @@ def buildJar() {
 
 def buildImage() {
     // echo "building the docker image of version ${params.VERSION}..."
-    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-        sh "docker build -t ${env.IMAGE_NAME} ."
-        sh "echo $PASS | docker login -u $USER --password-stdin"
-        sh "docker push ${env.IMAGE_NAME}"
+    withCredentials([
+        usernamePassword(
+            credentialsId: 'docker-hub-credentials',
+            passwordVariable: 'PASS',
+            usernameVariable: 'USER'
+        )
+    ]) {
+        sh """
+            echo "$PASS" | docker login -u "$USER" --password-stdin
+
+            docker buildx ls | grep -q '^multiarch ' || docker buildx create --name multiarch
+            docker buildx use multiarch
+            docker buildx inspect --bootstrap
+            
+            docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t ${env.IMAGE_NAME} \
+            --push .
+        """
     }
 } 
 
