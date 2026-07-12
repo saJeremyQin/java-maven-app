@@ -6,27 +6,41 @@ pipeline {
         maven "maven-3.9"
     }
 
+    environment {
+        // VERSION = "1.0"
+        IMAGE_NAME = "jeremyqindevops/java-maven-1.0"
+    }
+
     stages {
-        // stage("init") {
-        //     steps {
-        //         script {
-        //             gv = load "script.groovy"
-        //         }
-        //     }
-        // }
+        stage("init") {
+            steps {
+                script {
+                    gv = load "script.groovy"
+                }
+            }
+        }
         stage("test") {
 
             steps {
                 script {
                     echo "Testing the application"
-                    }
+                }
             }
         }
-        stage("build") {
+        stage("build app") {
          
             steps {
                 script {
-                    echo "building the application"
+                    // echo "building the application"
+                    gv.buildJar()
+                }
+            }
+        }
+        stage("build image") {
+            steps {
+                script {
+                    // echo "building the docker image"
+                    gv.buildImage()
                 }
             }
         }
@@ -34,7 +48,7 @@ pipeline {
             steps {
                 script {
                     echo "deploying the application"
-                    def dockerCmd = "docker run -d -p 8080:8080 jeremyqindevops/demo-app:1.0"
+                    def dockerCmd = "docker run -d -p 8080:8080 ${env.IMAGE_NAME}"
                     withCredentials([sshUserPrivateKey(
                         credentialsId: 'ec2-ssh-key',
                         keyFileVariable: 'KEY_FILE',
