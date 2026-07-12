@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     echo "deploying the application"
-                    def dockerCmd = "docker run -d -p 3080:3080 jeremyqindevops/demo-app:1.0"
+                    def dockerCmd = "docker run -d -p 8080:8080 jeremyqindevops/demo-app:1.0"
                     withCredentials([sshUserPrivateKey(
                         credentialsId: 'ec2-ssh-key',
                         keyFileVariable: 'KEY_FILE',
