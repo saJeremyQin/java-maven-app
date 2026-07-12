@@ -10,6 +10,6 @@ FROM eclipse-temurin:21-jre-jammy
 EXPOSE 8080
 
 WORKDIR /usr/app
-COPY ./target/java-maven-app-*.jar /usr/app
+COPY --from=builder /build/target/java-maven-app-*.jar /usr/app/app.jar
 
-CMD java -jar java-maven-app-*.jar
+CMD ["java", "-jar", "/usr/app/app.jar"]
