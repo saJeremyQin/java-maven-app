@@ -42,7 +42,7 @@ pipeline {
 
                             sh """
                                 chmod 400 $KEY_FILE
-                                ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@3.107.252.89 ${dockerCmd}
+                                ssh -o StrictHostKeyChecking=no -i $KEY_FILE $SSH_USER@13.211.234.57 ${dockerCmd}
                             """       
                     }
                 }
