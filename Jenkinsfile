@@ -7,8 +7,7 @@ pipeline {
     }
 
     environment {
-        // VERSION = "1.0"
-        IMAGE_NAME = "jeremyqindevops/java-maven-1.0"
+        IMAGE_REPO = "jeremyqindevops/java-maven-app"
     }
 
     stages {
@@ -16,6 +15,20 @@ pipeline {
             steps {
                 script {
                     gv = load "script.groovy"
+                }
+            }
+        }
+        stage("version bump") {
+            steps {
+                script {
+                    def appVersion = gv.bumpPomVersionAndPush()
+                    def branchTag = env.BRANCH_NAME.replaceAll('[^A-Za-z0-9_.-]', '-').toLowerCase()
+
+                    env.APP_VERSION = appVersion
+                    env.IMAGE_NAME = "${env.IMAGE_REPO}:${branchTag}-${env.APP_VERSION}"
+
+                    echo "Resolved version: ${env.APP_VERSION}"
+                    echo "Resolved image: ${env.IMAGE_NAME}"
                 }
             }
         }
