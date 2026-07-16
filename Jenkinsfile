@@ -5,9 +5,6 @@ pipeline {
     tools {
         maven "maven-3.9"
     }
-    environment {
-        IMAGE_NAME = "initialValue"
-    }
 
     stages {
         stage("init") {

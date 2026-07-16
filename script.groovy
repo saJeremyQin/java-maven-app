@@ -10,6 +10,7 @@ def incrementBuildNumber() {
         returnStdout: true
     ).trim()
     env.IMAGE_NAME = "${version}-${env.BUILD_NUMBER}"
+    echo "resolved IMAGE_NAME=${env.IMAGE_NAME}"
 }
 
 def buildJar() {
