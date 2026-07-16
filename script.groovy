@@ -58,7 +58,7 @@ def deployApp() {
     echo "deploying the application..."
     def fullImageName = "jeremyqindevops/java-maven-app:${env.IMAGE_NAME ?: 'latest'}"
     def shellCmd="bash server-cmds.sh ${fullImageName}"
-    def ec2Instance="ec2-user@12.11.11.11"
+    def ec2Instance="ec2-user@16.176.176.250"
     withCredentials([sshUserPrivateKey(
         credentialsId: 'ec2-ssh-key', 
         keyFileVariable: 'KEY_FILE')]) {
