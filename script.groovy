@@ -49,7 +49,7 @@ def commitBackToGit() {
         sh '''
             git add .
             git commit -m "Increment build number" || echo "No changes to commit"
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:env.ACTIVE_BRANCH
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:${ACTIVE_BRANCH}
         '''
     }
 }
@@ -57,16 +57,18 @@ def commitBackToGit() {
 def deployApp() {
     echo "deploying the application..."
     def fullImageName = "jeremyqindevops/java-maven-app:${env.IMAGE_NAME ?: 'latest'}"
-    def shellCmd="bash server-cmds.sh ${fullImageName}"
     def ec2Instance="ec2-user@16.176.176.250"
     withCredentials([sshUserPrivateKey(
         credentialsId: 'ec2-ssh-key', 
         keyFileVariable: 'KEY_FILE')]) {
             sh """
-                scp -i ${KEY_FILE} server-cmds.sh ${ec2Instance}:~
-                scp docker-compose.yaml ${ec2Instance}:~
-                chmod +x server-cmds.sh
-                ssh -o StrictHostKeyChecking=no -i ${KEY_FILE} ${ec2Instance} '${shellCmd}'
+                set -e
+                SCP_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i \$KEY_FILE"
+                SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i \$KEY_FILE"
+
+                scp \$SCP_OPTS server-cmds.sh docker-compose.yaml ${ec2Instance}:~
+                ssh \$SSH_OPTS ${ec2Instance} 'chmod +x ~/server-cmds.sh'
+                ssh \$SSH_OPTS ${ec2Instance} 'bash ~/server-cmds.sh ${fullImageName}'
             """
     }       
 } 
