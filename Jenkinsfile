@@ -5,6 +5,9 @@ pipeline {
     tools {
         maven "maven-3.9"
     }
+    environment {
+        IMAGE_NAME = "initialValue"
+    }
 
     stages {
         stage("init") {
@@ -49,6 +52,11 @@ pipeline {
         }
 
         stage("deploy") {
+            when {
+                expression {
+                    return env.ACTIVE_BRANCH == "jenkins" || env.ACTIVE_BRANCH == "master"
+                }
+            }
             steps {
                 script {
                     echo "deploying"

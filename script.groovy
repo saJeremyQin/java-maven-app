@@ -19,9 +19,8 @@ def buildJar() {
 }
 
 def buildImage() {
-    def imageName = env.IMAGE_NAME ?: "latest"
-    def imageTag = "jeremyqindevops/demo-app:${imageName}"
-    echo "building the docker image of version ${imageName}..."
+    def imageTag = "jeremyqindevops/java-maven-app:${env.IMAGE_NAME ?: 'latest'}"
+    echo "building and pushing docker image ${imageTag}..."
     withCredentials([
         usernamePassword(
             credentialsId: 'docker-hub-credentials',
@@ -29,9 +28,14 @@ def buildImage() {
             usernameVariable: 'USER'
         )
     ]) {
-        sh "docker build -t ${imageTag} ."
-        sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
-        sh "docker push ${imageTag}"
+            sh """
+                echo "$PASS" | docker login -u "$USER" --password-stdin
+
+                docker buildx ls | grep -q "multiarch" || docker buildx create --name multiarch --use
+                docker buildx inspect --bootstrap
+                docker buildx build --platform linux/amd64,linux/arm64 -t ${imageTag} --push .
+            """
+   
     }
 } 
 
@@ -45,13 +49,26 @@ def commitBackToGit() {
         sh '''
             git add .
             git commit -m "Increment build number" || echo "No changes to commit"
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:jenkins
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:env.ACTIVE_BRANCH
         '''
     }
 }
 
 def deployApp() {
-    echo "deploying the application of version ${params.VERSION}..."
+    echo "deploying the application..."
+    def fullImageName = "jeremyqindevops/java-maven-app:${env.IMAGE_NAME ?: 'latest'}"
+    def shellCmd="bash server-cmds.sh ${fullImageName}"
+    def ec2Instance="ec2-user@12.11.11.11"
+    withCredentials([sshUserPrivateKey(
+        credentialsId: 'ec2-ssh-key', 
+        keyFileVariable: 'KEY_FILE')]) {
+            sh """
+                scp -i ${KEY_FILE} server-cmds.sh ${ec2Instance}:~
+                scp docker-compose.yaml ${ec2Instance}:~
+                chmod +x server-cmds.sh
+                ssh -o StrictHostKeyChecking=no -i ${KEY_FILE} ${ec2Instance} '${shellCmd}'
+            """
+    }       
 } 
 
 return this
