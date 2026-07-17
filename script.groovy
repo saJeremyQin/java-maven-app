@@ -58,7 +58,7 @@ def commitBackToGit() {
 def deployApp() {
     echo "deploying the application..."
     def fullImageName = "jeremyqindevops/java-maven-app:${env.IMAGE_NAME ?: 'latest'}"
-    def ec2Instance="ec2-user@16.176.176.250"
+    def ec2Instance="ec2-user@13.211.213.171"
     withCredentials([sshUserPrivateKey(
         credentialsId: 'ec2-ssh-key', 
         keyFileVariable: 'KEY_FILE')]) {
