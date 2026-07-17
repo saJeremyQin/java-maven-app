@@ -10,6 +10,7 @@ pipeline {
         stage("init") {
             steps {
                 script {
+                    scmSkip(deleteBuild: true, skipPattern: '.*\\[skip-ci\\].*')
                     gv = load "script.groovy"
                     env.ACTIVE_BRANCH = (env.BRANCH_NAME ?: env.GIT_BRANCH ?: env.CHANGE_BRANCH ?: "")
                         .replaceFirst(/^origin\//, "")

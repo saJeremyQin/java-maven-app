@@ -49,7 +49,7 @@ def commitBackToGit() {
     ]) {
         sh '''
             git add .
-            git commit -m "Increment build number" || echo "No changes to commit"
+            git commit -m "Increment build number [skip-ci]" || echo "No changes to commit"
             git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:${ACTIVE_BRANCH}
         '''
     }
