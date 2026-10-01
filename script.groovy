@@ -74,13 +74,20 @@ def deployApp() {
             sh '''
                 set -e
                 set +x
-                SCP_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$KEY_FILE")
-                SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -i "$KEY_FILE")
+
+                ssh_ec2() {
+                    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+                        -o ConnectTimeout=10 -i "$KEY_FILE" "$EC2_INSTANCE" "$@"
+                }
+                scp_ec2() {
+                    scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+                        -i "$KEY_FILE" "$@"
+                }
 
                 ready=0
                 attempt=1
                 while [ "$attempt" -le 30 ]; do
-                    if ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'sudo cloud-init status --wait && docker compose version'; then
+                    if ssh_ec2 'sudo cloud-init status --wait && docker compose version'; then
                         ready=1
                         break
                     fi
@@ -94,15 +101,15 @@ def deployApp() {
                     exit 1
                 fi
 
-                scp "${SCP_OPTS[@]}" server-cmds.sh docker-compose.yaml "$EC2_INSTANCE:~"
-                ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'chmod +x ~/server-cmds.sh'
+                scp_ec2 server-cmds.sh docker-compose.yaml "$EC2_INSTANCE:~"
+                ssh_ec2 'chmod +x ~/server-cmds.sh'
 
                 {
                     printf '%s\n' "$USER"
                     printf '%s' "$PASS"
-                } | ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'IFS= read -r USER; docker login --username "$USER" --password-stdin'
+                } | ssh_ec2 'IFS= read -r USER; docker login --username "$USER" --password-stdin'
 
-                printf '%s\n' "$IMAGE_TAG" | ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'IFS= read -r IMAGE; export IMAGE; trap "docker logout >/dev/null 2>&1 || true" EXIT; bash ~/server-cmds.sh'
+                printf '%s\n' "$IMAGE_TAG" | ssh_ec2 'IFS= read -r IMAGE; export IMAGE; trap "docker logout >/dev/null 2>&1 || true" EXIT; bash ~/server-cmds.sh'
             '''
         }
     }
