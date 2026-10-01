@@ -29,14 +29,17 @@ def buildImage() {
             usernameVariable: 'USER'
         )
     ]) {
-            sh """
-                echo "$PASS" | docker login -u "$USER" --password-stdin
+        withEnv(["IMAGE_TAG=${imageTag}"]) {
+            sh '''
+                set -eu
+                set +x
+                printf '%s' "$PASS" | docker login -u "$USER" --password-stdin
 
                 docker buildx ls | grep -q "multiarch" || docker buildx create --name multiarch --use
                 docker buildx inspect --bootstrap
-                docker buildx build --platform linux/amd64,linux/arm64 -t ${imageTag} --push .
-            """
-   
+                docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE_TAG" --push .
+            '''
+        }
     }
 } 
 
@@ -58,20 +61,51 @@ def commitBackToGit() {
 def deployApp() {
     echo "deploying the application..."
     def fullImageName = "jeremyqindevops/java-maven-app:${env.IMAGE_NAME ?: 'latest'}"
-    def ec2Instance="ec2-user@13.211.213.171"
-    withCredentials([sshUserPrivateKey(
-        credentialsId: 'ec2-ssh-key', 
-        keyFileVariable: 'KEY_FILE')]) {
-            sh """
+    def ec2Instance="ec2-user@${env.PUBLIC_EC2_IP}"
+    withCredentials([
+        sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'KEY_FILE'),
+        usernamePassword(
+            credentialsId: 'docker-hub-credentials',
+            passwordVariable: 'PASS',
+            usernameVariable: 'USER'
+        )
+    ]) {
+        withEnv(["EC2_INSTANCE=${ec2Instance}", "IMAGE_TAG=${fullImageName}"]) {
+            sh '''
                 set -e
-                SCP_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i \$KEY_FILE"
-                SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i \$KEY_FILE"
+                set +x
+                SCP_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$KEY_FILE")
+                SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -i "$KEY_FILE")
 
-                scp \$SCP_OPTS server-cmds.sh docker-compose.yaml ${ec2Instance}:~
-                ssh \$SSH_OPTS ${ec2Instance} 'chmod +x ~/server-cmds.sh'
-                ssh \$SSH_OPTS ${ec2Instance} 'bash ~/server-cmds.sh ${fullImageName}'
-            """
-    }       
+                ready=0
+                attempt=1
+                while [ "$attempt" -le 30 ]; do
+                    if ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'sudo cloud-init status --wait && docker compose version'; then
+                        ready=1
+                        break
+                    fi
+                    echo "Waiting for EC2 initialization (attempt $attempt/30)..."
+                    sleep 10
+                    attempt=$((attempt + 1))
+                done
+
+                if [ "$ready" -ne 1 ]; then
+                    echo "EC2 SSH did not become ready within five minutes." >&2
+                    exit 1
+                fi
+
+                scp "${SCP_OPTS[@]}" server-cmds.sh docker-compose.yaml "$EC2_INSTANCE:~"
+                ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'chmod +x ~/server-cmds.sh'
+
+                {
+                    printf '%s\n' "$USER"
+                    printf '%s' "$PASS"
+                } | ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'IFS= read -r USER; docker login --username "$USER" --password-stdin'
+
+                printf '%s\n' "$IMAGE_TAG" | ssh "${SSH_OPTS[@]}" "$EC2_INSTANCE" 'IFS= read -r IMAGE; export IMAGE; trap "docker logout >/dev/null 2>&1 || true" EXIT; bash ~/server-cmds.sh'
+            '''
+        }
+    }
 } 
 
 return this

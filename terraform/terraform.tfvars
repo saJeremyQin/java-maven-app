@@ -1,0 +1,8 @@
+vpc_cidr = "10.0.0.0/16"
+environment="dev" 
+aws_region="ap-southeast-2"
+ami_id="ami-0720cb7af233b0529"
+instance_type="t2.micro"
+jenkins_ip="134.199.156.14/32"
+key_name="maven-app-key"
+my_ip="49.178.203.61/32"
