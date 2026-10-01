@@ -51,7 +51,7 @@ def commitBackToGit() {
     withCredentials([string(credentialsId: 'github-secret-text', variable: 'GITHUB_TOKEN')
     ]) {
         sh '''
-            git add .
+            git add pom.xml terraform/.terraform.lock.hcl
             git commit -m "Increment build number [skip-ci]" || echo "No changes to commit"
             git push "https://x-access-token:${GITHUB_TOKEN}@github.com/saJeremyQin/java-maven-app.git" HEAD:${ACTIVE_BRANCH}
         '''

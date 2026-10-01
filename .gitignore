@@ -1,3 +1,13 @@
 .idea/*
 target
 .vscode/*
+
+# Terraform cache, state, and local plan output
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+*_override.tf
+*_override.tf.json
