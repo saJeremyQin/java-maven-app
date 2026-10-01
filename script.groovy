@@ -87,17 +87,29 @@ def deployApp() {
                 ready=0
                 attempt=1
                 while [ "$attempt" -le 30 ]; do
-                    if ssh_ec2 'sudo cloud-init status --wait && docker compose version'; then
+                    if ssh_ec2 true; then
                         ready=1
                         break
                     fi
-                    echo "Waiting for EC2 initialization (attempt $attempt/30)..."
+                    echo "Waiting for EC2 SSH (attempt $attempt/30)..."
                     sleep 10
                     attempt=$((attempt + 1))
                 done
 
                 if [ "$ready" -ne 1 ]; then
                     echo "EC2 SSH did not become ready within five minutes." >&2
+                    exit 1
+                fi
+
+                if ! ssh_ec2 'sudo cloud-init status --wait'; then
+                    echo "EC2 cloud-init failed; startup diagnostics follow." >&2
+                    ssh_ec2 'sudo cloud-init status --long; sudo tail -n 100 /var/log/cloud-init-output.log; sudo tail -n 100 /var/log/cloud-init.log' || true
+                    exit 1
+                fi
+
+                if ! ssh_ec2 'docker compose version'; then
+                    echo "Docker Compose is not available after cloud-init." >&2
+                    ssh_ec2 'sudo tail -n 100 /var/log/cloud-init-output.log' || true
                     exit 1
                 fi
 
